@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 ## Data
 
@@ -36,7 +31,8 @@ The dataset is stored in a comma-separated-value (CSV) file and there are a tota
 
 First, we will remove all variables from the environment and choose the POSIX locale.
 
-```{r results="hide"}
+
+```r
 rm(list=ls(all=TRUE))
 Sys.setlocale(category = "LC_ALL", locale = "C")
 ```
@@ -46,12 +42,21 @@ Sys.setlocale(category = "LC_ALL", locale = "C")
 
 Next, we load the data into a dataframe and inspect its overall structure.
 
-```{r}
+
+```r
 activity.df <- read.csv("activity.csv", header = TRUE)
 ```
 
-```{r}
+
+```r
 str(activity.df)
+```
+
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : Factor w/ 61 levels "2012-10-01","2012-10-02",..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
 ```
 
 
@@ -64,8 +69,25 @@ the dataset.
 
 We use the `dplyr` library to summarise the dataframe.
 
-```{r}
+
+```r
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 total.per.day <- summarise(group_by(activity.df, date),
                            steps = sum(steps, na.rm = TRUE))
 hist(total.per.day$steps,
@@ -74,23 +96,39 @@ hist(total.per.day$steps,
      xlab = "Steps per day")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+
 ### Calculating and report the **mean** and **median** total number of steps taken per day
 
 We now calculate the **mean** and **median** over the total number of steps.
 
-```{r}
+
+```r
 mean.per.day <- round(mean(total.per.day$steps), 3)
 median.per.day <- round(median(total.per.day$steps), 3)
 ```
 
-```{r}
+
+```r
 mean.per.day
+```
+
+```
+## [1] 9354.23
+```
+
+```r
 median.per.day
+```
+
+```
+## [1] 10395
 ```
 
 Then we supplement the histogram with the **mean** and **median** values.
 
-```{r}
+
+```r
 hist(total.per.day$steps,
      breaks = 40,
      main = "Total Number of Steps per Day",
@@ -105,12 +143,15 @@ legend("topright", lwd = c(3, 1), col = "grey",
        )
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png) 
+
 
 ## What is the average daily activity pattern?
 
 ### Making a time series plot of the 5-minute interval and the average number of steps taken, averaged across all days
 
-```{r}
+
+```r
 # summarize dataset by interval
 activity.df.interv <- summarise(group_by(activity.df,
                                         interval),
@@ -125,9 +166,12 @@ with(activity.df.interv, {
         })
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
+
 ### Finding which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps
 
-```{r}
+
+```r
 # which interval has the maximum average steps
 max_steps <- activity.df.interv[which.max(activity.df.interv$avg_steps), ]
 
@@ -143,13 +187,20 @@ points(max_steps$interval,  max_steps$avg_steps,
        col = "red", lwd = 3, pch = 19)
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png) 
+
 
 ## Imputing missing values
 
 ### Calculating the total number of missing values in the dataset
 
-```{r}
+
+```r
 sum(is.na(activity.df$steps))
+```
+
+```
+## [1] 2304
 ```
 
 ### Devising a strategy for filling in all of the missing values in the dataset
@@ -158,7 +209,8 @@ For simplicity's sake, we choose to fill in all the missing values with the mean
 
 ### Creating a new dataset that is equal to the original dataset but with the missing data filled in
 
-```{r}
+
+```r
 # calculate the mean on a daily basis, removing NA values
 mean.per.interv <- summarise(group_by(activity.df, interval),
                              mean = mean(steps, na.rm = TRUE))
@@ -178,7 +230,8 @@ activity.df.wo.na <- subset(activity.df.wo.na, select = -mean)
 
 ### Making a histogram of the total number of steps taken each day and calculating and reporting the **mean** and **median** total number of steps taken per day
 
-```{r}
+
+```r
 total.per.day.wo.na <- summarise(group_by(activity.df.wo.na, date),
                                  steps = sum(steps))
 mean.per.day.wo.na <- round(mean(total.per.day.wo.na$steps), 3)
@@ -198,6 +251,8 @@ legend("topright", lwd = c(3, 1), col = "grey",
        )
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-12-1.png) 
+
 ### Do the values differ from the estimates from the first part of the assignment?
 
 After replacing missing values with the mean per interval, the mean and the median are now pretty much the same.
@@ -207,7 +262,8 @@ After replacing missing values with the mean per interval, the mean and the medi
 
 ### Creating a new factor variable in the dataset with two levels
 
-```{r}
+
+```r
 # add a new factor column "daytype"
 activity.df.wo.na$daytype <- ifelse(
         weekdays(
@@ -224,7 +280,8 @@ activity.df.wo.na <- summarise(group_by(activity.df.wo.na,
 
 ### Making a panel plot containing a time series plot of the 5-minute interval and the average number of steps taken
 
-```{r}
+
+```r
 # load the lattice library
 library(lattice)
 
@@ -235,7 +292,8 @@ xyplot(avg_steps ~ interval | daytype,
        xlab = "Interval",
        ylab = "Number of Steps",
        layout = c(1, 2))
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-14-1.png) 
 
 During weekdays, the frequency of the steps exibits a much more defined "shape".  This might to be related to a less flexible daily schedule.
